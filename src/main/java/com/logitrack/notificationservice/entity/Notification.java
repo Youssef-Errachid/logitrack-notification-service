@@ -28,7 +28,7 @@ public class Notification {
     @Column(name = "date_creation", nullable = false)
     private LocalDateTime dateCreation;
 
-    @Column(nullable = false)
+    @Column(name = "is_read", nullable = false)
     private boolean read;
 
     @Column(name = "order_id", nullable = false)

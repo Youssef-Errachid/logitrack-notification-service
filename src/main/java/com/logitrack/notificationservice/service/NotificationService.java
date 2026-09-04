@@ -1,18 +1,19 @@
 package com.logitrack.notificationservice.service;
 
-import com.logitrack.notificationservice.entity.Notification;
+import com.logitrack.notificationservice.dto.NotificationRequest;
+import com.logitrack.notificationservice.dto.NotificationResponse;
 
 import java.util.List;
 
 public interface NotificationService {
 
-    List<Notification> getAllNotifications();
+    List<NotificationResponse> getAllNotifications();
 
-    Notification getNotificationById(Long id);
+    NotificationResponse getNotificationById(Long id);
 
-    List<Notification> getNotificationsByOrderId(Long orderId);
+    List<NotificationResponse> getNotificationsByOrderId(Long orderId);
 
-    Notification createNotification(Notification notification);
+    NotificationResponse createNotification(NotificationRequest request);
 
-    Notification markAsRead(Long id);
+    NotificationResponse markAsRead(Long id);
 }

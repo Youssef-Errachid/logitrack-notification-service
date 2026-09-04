@@ -1,5 +1,7 @@
 package com.logitrack.notificationservice.service;
 
+import com.logitrack.notificationservice.dto.NotificationRequest;
+import com.logitrack.notificationservice.dto.NotificationResponse;
 import com.logitrack.notificationservice.entity.Notification;
 import com.logitrack.notificationservice.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,36 +17,49 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
 
     @Override
-    public List<Notification> getAllNotifications() {
-        return notificationRepository.findAll();
+    public List<NotificationResponse> getAllNotifications() {
+        return notificationRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
-    public Notification getNotificationById(Long id) {
-        return notificationRepository.findById(id)
+    public NotificationResponse getNotificationById(Long id) {
+        Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Notification not found with id: " + id)
                 );
+
+        return toResponse(notification);
     }
 
     @Override
-    public List<Notification> getNotificationsByOrderId(Long orderId) {
-        return notificationRepository.findByOrderId(orderId);
+    public List<NotificationResponse> getNotificationsByOrderId(Long orderId) {
+        return notificationRepository.findByOrderId(orderId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
-    public Notification createNotification(Notification notification) {
+    public NotificationResponse createNotification(NotificationRequest request) {
+        Notification notification = Notification.builder()
+                .message(request.message())
+                .kind(request.kind())
+                .dateCreation(LocalDateTime.now())
+                .read(false)
+                .orderId(request.orderId())
+                .build();
 
-        notification.setId(null);
-        notification.setDateCreation(LocalDateTime.now());
-        notification.setRead(false);
+        Notification savedNotification =
+                notificationRepository.save(notification);
 
-        return notificationRepository.save(notification);
+        return toResponse(savedNotification);
     }
 
     @Override
-    public Notification markAsRead(Long id) {
-
+    public NotificationResponse markAsRead(Long id) {
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Notification not found with id: " + id)
@@ -52,6 +67,20 @@ public class NotificationServiceImpl implements NotificationService {
 
         notification.setRead(true);
 
-        return notificationRepository.save(notification);
+        Notification savedNotification =
+                notificationRepository.save(notification);
+
+        return toResponse(savedNotification);
+    }
+
+    private NotificationResponse toResponse(Notification notification) {
+        return new NotificationResponse(
+                notification.getId(),
+                notification.getMessage(),
+                notification.getKind(),
+                notification.getDateCreation(),
+                notification.isRead(),
+                notification.getOrderId()
+        );
     }
 }
